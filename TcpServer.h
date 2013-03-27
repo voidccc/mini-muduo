@@ -1,24 +1,32 @@
 //author voidccc
-#include <sys/socket.h>
-#include <sys/epoll.h>
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <string.h> //for bzero
-#include <iostream>
+#ifndef TCPSERVER_H
+#define TCPSERVER_H
 
-#define MAX_LINE 100
-#define MAX_EVENTS 500
-#define MAX_LISTENFD 5
+#include <sys/epoll.h>
+
+#include "Declear.h"
+#include "Define.h"
+#include "IChannelCallBack.h"
+
+#include <map>
 
 using namespace std;
 
-class TcpServer
+class TcpServer : public IChannelCallBack
 {
     public:
         TcpServer();
         ~TcpServer();
         void start();
+        virtual void OnIn(int sockfd);
     private:
         int createAndListen();
+        void update(Channel* pChannel, int op);
+
+        int _epollfd;
+        int _listenfd;
+        struct epoll_event _events[MAX_EVENTS];
+        map<int, Channel*> _channels;
 };
+
+#endif
