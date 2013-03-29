@@ -26,12 +26,9 @@ void Channel::setRevents(int revents)
 void Channel::handleEvent()
 {
    if(_revents & EPOLLIN)
+   {
       _callBack->OnIn(_sockfd);
-}
-
-int Channel::getSockfd()
-{
-    return _sockfd;
+   }
 }
 
 void Channel::enableReading()

@@ -12,7 +12,6 @@ class Channel
         void setCallBack(IChannelCallBack* callBack);
         void handleEvent();
         void setRevents(int revent);
-        int getSockfd();
         void enableReading();
     private:
         void update();

@@ -6,27 +6,26 @@
 
 #include "Declear.h"
 #include "Define.h"
-#include "IChannelCallBack.h"
+#include "IAcceptorCallBack.h"
 
 #include <map>
 
 using namespace std;
 
-class TcpServer : public IChannelCallBack
+class TcpServer : public IAcceptorCallBack
 {
     public:
         TcpServer();
         ~TcpServer();
         void start();
-        virtual void OnIn(int sockfd);
+        virtual void newConnection(int sockfd);
     private:
-        int createAndListen();
         void update(Channel* pChannel, int op);
 
         int _epollfd;
-        int _listenfd;
         struct epoll_event _events[MAX_EVENTS];
-        map<int, Channel*> _channels;
+        map<int, TcpConnection*> _connections;
+        Acceptor* _pAcceptor;
 };
 
 #endif
