@@ -7,5 +7,7 @@ class IAcceptorCallBack;
 class Channel;
 class Acceptor;
 class TcpConnection;
+class EventLoop;
+class Epoll;
 
 #endif

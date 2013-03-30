@@ -8,13 +8,14 @@
 class TcpConnection : public IChannelCallBack
 {
     public:
-        TcpConnection(int epollfd, int sockfd);
+        TcpConnection(int sockfd, EventLoop* loop);
         ~TcpConnection();
 
         void virtual OnIn(int sockfd);
     private:
-        int _epollfd;
         int _sockfd;
         Channel* _pChannel;
+        EventLoop* _loop;
 };
+
 #endif

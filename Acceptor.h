@@ -9,17 +9,18 @@
 class Acceptor : public IChannelCallBack
 {
     public:
-        Acceptor(int epollfd);
+        Acceptor(EventLoop* loop);
         ~Acceptor();
 
-        void virtual OnIn(int socket);
-        void setCallBack(IAcceptorCallBack* pCallBack);
         void start();
+        void setCallBack(IAcceptorCallBack* pCallBack);
+        void virtual OnIn(int socket);
     private:
         int createAndListen();
-        int _epollfd;
         int _listenfd;
         Channel* _pAcceptChannel;
         IAcceptorCallBack* _pCallBack;
+        EventLoop* _loop;
 };
+
 #endif

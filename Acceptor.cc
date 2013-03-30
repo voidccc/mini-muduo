@@ -1,22 +1,22 @@
 //author voidccc
 
-#include "Acceptor.h"
-#include "Channel.h"
-#include "IAcceptorCallBack.h"
-
-#include <sys/socket.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <errno.h>
 
+#include "Acceptor.h"
+#include "Channel.h"
+#include "IAcceptorCallBack.h"
+#include "EventLoop.h"
+
 #include <iostream>
 using namespace std;
 
-Acceptor::Acceptor(int epollfd)
-    :_epollfd(epollfd)
-    ,_listenfd(-1)
+Acceptor::Acceptor(EventLoop* loop)
+    :_listenfd(-1)
     ,_pAcceptChannel(NULL)
     ,_pCallBack(NULL)
+    ,_loop(loop)
 {}
 
 Acceptor::~Acceptor()
@@ -25,7 +25,7 @@ Acceptor::~Acceptor()
 void Acceptor::start()
 {
     _listenfd = createAndListen();
-    _pAcceptChannel = new Channel(_epollfd, _listenfd); // Memory Leak !!!
+    _pAcceptChannel = new Channel(_loop, _listenfd); // Memory Leak !!!
     _pAcceptChannel->setCallBack(this);
     _pAcceptChannel->enableReading();
 }

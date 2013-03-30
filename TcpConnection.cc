@@ -1,4 +1,5 @@
 //author voidccc
+
 #include <errno.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -6,17 +7,18 @@
 
 #include "TcpConnection.h"
 #include "Channel.h"
+#include "EventLoop.h"
 #include "Define.h"
 
 #include <string.h> //for bzero
 #include <iostream>
 using namespace std;
 
-TcpConnection::TcpConnection(int epollfd, int sockfd)
-    :_epollfd(epollfd)
-    ,_sockfd(sockfd)
+TcpConnection::TcpConnection(int sockfd, EventLoop* loop)
+    :_sockfd(sockfd)
+    ,_loop(loop)
 {
-    _pChannel = new Channel(_epollfd, _sockfd); // Memory Leak !!!
+    _pChannel = new Channel(_loop, _sockfd); // Memory Leak !!!
     _pChannel->setCallBack(this);
     _pChannel->enableReading();
 }

@@ -1,15 +1,19 @@
 //author voidccc
+
+#include <sys/epoll.h>
+
 #include "Channel.h"
 #include "IChannelCallBack.h"
-#include <sys/epoll.h>
+#include "EventLoop.h"
+
 #include <iostream>
 
-Channel::Channel(int epollfd, int sockfd)
-    :_epollfd(epollfd)
-    ,_sockfd(sockfd)
+Channel::Channel(EventLoop* loop, int sockfd)
+    :_sockfd(sockfd)
     ,_events(0)
     ,_revents(0)
     ,_callBack(NULL)
+    ,_loop(loop)
 {
 }
 
@@ -39,8 +43,15 @@ void Channel::enableReading()
 
 void Channel::update()
 {
-    struct epoll_event ev;
-    ev.data.ptr = this;
-    ev.events = _events;
-    epoll_ctl(_epollfd, EPOLL_CTL_ADD, _sockfd, &ev);
+    _loop->update(this);
+}
+
+int Channel::getEvents()
+{
+    return _events;
+}
+
+int Channel::getSockfd()
+{
+    return _sockfd;
 }
