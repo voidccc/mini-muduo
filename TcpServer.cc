@@ -8,13 +8,11 @@
 #include "TcpConnection.h"
 
 #include <vector>
-#include <iostream>
 
-using namespace std;
-
-TcpServer::TcpServer(EventLoop* loop)
+TcpServer::TcpServer(EventLoop* pLoop)
     :_pAcceptor(NULL)
-    ,_loop(loop)
+    ,_pLoop(pLoop)
+    ,_pUser(NULL)
 {
 }
 
@@ -24,13 +22,20 @@ TcpServer::~TcpServer()
 
 void TcpServer::start()
 {
-    _pAcceptor = new Acceptor(_loop); // Memory Leak !!!
-    _pAcceptor->setCallBack(this);
+    _pAcceptor = new Acceptor(_pLoop); // Memory Leak !!!
+    _pAcceptor->setCallback(this);
     _pAcceptor->start();
 }
 
 void TcpServer::newConnection(int sockfd)
 {
-    TcpConnection* tcp = new TcpConnection(sockfd, _loop); // Memory Leak !!!
+    TcpConnection* tcp = new TcpConnection(sockfd, _pLoop); // Memory Leak !!!
     _connections[sockfd] = tcp;
+    tcp->setUser(_pUser);
+    tcp->connectEstablished();
+}
+
+void TcpServer::setCallback(IMuduoUser* user)
+{
+    _pUser = user;
 }

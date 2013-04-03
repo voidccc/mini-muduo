@@ -6,17 +6,17 @@
 
 #include "Acceptor.h"
 #include "Channel.h"
-#include "IAcceptorCallBack.h"
+#include "IAcceptorCallback.h"
 #include "EventLoop.h"
 
 #include <iostream>
 using namespace std;
 
-Acceptor::Acceptor(EventLoop* loop)
+Acceptor::Acceptor(EventLoop* pLoop)
     :_listenfd(-1)
     ,_pAcceptChannel(NULL)
-    ,_pCallBack(NULL)
-    ,_loop(loop)
+    ,_pCallback(NULL)
+    ,_pLoop(pLoop)
 {}
 
 Acceptor::~Acceptor()
@@ -25,8 +25,8 @@ Acceptor::~Acceptor()
 void Acceptor::start()
 {
     _listenfd = createAndListen();
-    _pAcceptChannel = new Channel(_loop, _listenfd); // Memory Leak !!!
-    _pAcceptChannel->setCallBack(this);
+    _pAcceptChannel = new Channel(_pLoop, _listenfd); // Memory Leak !!!
+    _pAcceptChannel->setCallback(this);
     _pAcceptChannel->enableReading();
 }
 
@@ -53,7 +53,7 @@ int Acceptor::createAndListen()
     return _listenfd;
 }
 
-void Acceptor::OnIn(int socket)
+void Acceptor::onIn(int socket)
 {
     int connfd;
     struct sockaddr_in cliaddr;
@@ -74,10 +74,10 @@ void Acceptor::OnIn(int socket)
     }
     fcntl(connfd, F_SETFL, O_NONBLOCK); //no-block io
 
-    _pCallBack->newConnection(connfd);
+    _pCallback->newConnection(connfd);
 }
 
-void Acceptor::setCallBack(IAcceptorCallBack* pCallBack)
+void Acceptor::setCallback(IAcceptorCallback* pCallback)
 {
-     _pCallBack = pCallBack;
+    _pCallback = pCallback;
 }

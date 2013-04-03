@@ -6,7 +6,7 @@
 
 EventLoop::EventLoop()
     :_quit(false)
-    ,_poller(new Epoll()) // Memory Leak !!!
+    ,_pPoller(new Epoll()) // Memory Leak !!!
 {
 }
 
@@ -18,7 +18,7 @@ void EventLoop::loop()
     while(!_quit)
     {
         vector<Channel*> channels;
-        _poller->poll(&channels);
+        _pPoller->poll(&channels);
 
         vector<Channel*>::iterator it;
         for(it = channels.begin(); it != channels.end(); ++it)
@@ -28,7 +28,7 @@ void EventLoop::loop()
     }
 }
 
-void EventLoop::update(Channel* channel)
+void EventLoop::update(Channel* pChannel)
 {
-    _poller->update(channel);
+    _pPoller->update(pChannel);
 }

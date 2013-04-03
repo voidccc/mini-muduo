@@ -2,10 +2,10 @@
 #ifndef ICHANNELCALLBACK_H
 #define ICHANNELCALLBACK_H
 
-class IChannelCallBack
+class IChannelCallback
 {
     public:
-        void virtual OnIn(int sockfd){};
+        void virtual onIn(int sockfd) = 0;
 };
 
 #endif

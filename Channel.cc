@@ -3,23 +3,24 @@
 #include <sys/epoll.h>
 
 #include "Channel.h"
-#include "IChannelCallBack.h"
+#include "IChannelCallback.h"
 #include "EventLoop.h"
 
 #include <iostream>
+using namespace std;
 
-Channel::Channel(EventLoop* loop, int sockfd)
+Channel::Channel(EventLoop* pLoop, int sockfd)
     :_sockfd(sockfd)
     ,_events(0)
     ,_revents(0)
-    ,_callBack(NULL)
-    ,_loop(loop)
+    ,_pCallback(NULL)
+    ,_pLoop(pLoop)
 {
 }
 
-void Channel::setCallBack(IChannelCallBack* callBack)
+void Channel::setCallback(IChannelCallback* pCallback)
 {
-    _callBack = callBack;
+    _pCallback = pCallback;
 }
 
 void Channel::setRevents(int revents)
@@ -31,7 +32,7 @@ void Channel::handleEvent()
 {
    if(_revents & EPOLLIN)
    {
-      _callBack->OnIn(_sockfd);
+      _pCallback->onIn(_sockfd);
    }
 }
 
@@ -43,7 +44,7 @@ void Channel::enableReading()
 
 void Channel::update()
 {
-    _loop->update(this);
+    _pLoop->update(this);
 }
 
 int Channel::getEvents()

@@ -2,10 +2,10 @@
 #ifndef IACCEPTORCALLBACK_H 
 #define IACCEPTORCALLBACK_H
 
-class IAcceptorCallBack
+class IAcceptorCallback
 {
     public:
-        void virtual newConnection(int sockfd){};
+        void virtual newConnection(int sockfd) = 0;
 };
 
 #endif

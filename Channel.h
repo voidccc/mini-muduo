@@ -7,9 +7,9 @@
 class Channel
 {
     public:
-        Channel(EventLoop* loop, int sockfd);
+        Channel(EventLoop* pLoop, int sockfd);
         ~Channel();
-        void setCallBack(IChannelCallBack* callBack);
+        void setCallback(IChannelCallback* pCallback);
         void handleEvent();
         void setRevents(int revent);
         void enableReading();
@@ -20,8 +20,8 @@ class Channel
         int _sockfd;
         int _events;
         int _revents;
-        IChannelCallBack* _callBack;
-        EventLoop* _loop;
+        IChannelCallback* _pCallback;
+        EventLoop* _pLoop;
 };
 
 #endif

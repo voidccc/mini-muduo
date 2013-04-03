@@ -10,10 +10,10 @@ class EventLoop
         EventLoop();
         ~EventLoop();
         void loop();
-        void update(Channel* channel);
+        void update(Channel* pChannel);
     private:
         bool _quit;
-        Epoll* _poller;
+        Epoll* _pPoller;
 };
 
 #endif

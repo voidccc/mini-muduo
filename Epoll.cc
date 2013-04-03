@@ -35,11 +35,11 @@ void Epoll::poll(vector<Channel*>* pChannels)
     }
 }
 
-void Epoll::update(Channel* channel)
+void Epoll::update(Channel* pChannel)
 {
     struct epoll_event ev;
-    ev.data.ptr = channel;
-    ev.events = channel->getEvents();
-    int fd = channel->getSockfd();
+    ev.data.ptr = pChannel;
+    ev.events = pChannel->getEvents();
+    int fd = pChannel->getSockfd();
     ::epoll_ctl(_epollfd, EPOLL_CTL_ADD, fd, &ev);
 }
