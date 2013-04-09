@@ -4,22 +4,24 @@
 
 #include "Declear.h"
 #include "Define.h"
-#include "IChannelCallBack.h"
+#include "IChannelCallback.h"
 
-class Acceptor : public IChannelCallBack
+class Acceptor : public IChannelCallback
 {
     public:
-        Acceptor(int epollfd);
+        Acceptor(EventLoop* pLoop);
         ~Acceptor();
 
-        void virtual OnIn(int socket);
-        void setCallBack(IAcceptorCallBack* pCallBack);
         void start();
+        void setCallback(IAcceptorCallback* pCallback);
+        void virtual handleRead();
+        void virtual handleWrite();
     private:
         int createAndListen();
-        int _epollfd;
         int _listenfd;
         Channel* _pAcceptChannel;
-        IAcceptorCallBack* _pCallBack;
+        IAcceptorCallback* _pCallback;
+        EventLoop* _pLoop;
 };
+
 #endif

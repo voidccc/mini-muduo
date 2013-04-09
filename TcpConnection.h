@@ -3,18 +3,30 @@
 #define TCPCONNECTION_H
 
 #include "Declear.h"
-#include "IChannelCallBack.h"
+#include "IChannelCallback.h"
 
-class TcpConnection : public IChannelCallBack
+#include <string>
+using namespace std;
+
+class TcpConnection : public IChannelCallback
 {
     public:
-        TcpConnection(int epollfd, int sockfd);
+        TcpConnection(int sockfd, EventLoop* pLoop);
         ~TcpConnection();
+        void send(const string& message);
+        void connectEstablished();
+        void setUser(IMuduoUser* pUser);
 
-        void virtual OnIn(int sockfd);
+        void setCallback(IAcceptorCallback* pCallback);
+        void virtual handleRead();
+        void virtual handleWrite();
     private:
-        int _epollfd;
         int _sockfd;
         Channel* _pChannel;
+        EventLoop* _pLoop;
+        IMuduoUser* _pUser;
+        string* _inBuf;
+        string* _outBuf;
 };
+
 #endif

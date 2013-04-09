@@ -1,21 +1,27 @@
 //author voidccc
-#include "Channel.h"
-#include "IChannelCallBack.h"
-#include <sys/epoll.h>
-#include <iostream>
 
-Channel::Channel(int epollfd, int sockfd)
-    :_epollfd(epollfd)
-    ,_sockfd(sockfd)
+#include <sys/epoll.h>
+
+#include "Channel.h"
+#include "IChannelCallback.h"
+#include "EventLoop.h"
+
+#include <iostream>
+using namespace std;
+
+Channel::Channel(EventLoop* pLoop, int sockfd)
+    :_sockfd(sockfd)
     ,_events(0)
     ,_revents(0)
-    ,_callBack(NULL)
+    ,_index(-1)
+    ,_pCallback(NULL)
+    ,_pLoop(pLoop)
 {
 }
 
-void Channel::setCallBack(IChannelCallBack* callBack)
+void Channel::setCallback(IChannelCallback* pCallback)
 {
-    _callBack = callBack;
+    _pCallback = pCallback;
 }
 
 void Channel::setRevents(int revents)
@@ -23,11 +29,20 @@ void Channel::setRevents(int revents)
     _revents = revents;
 }
 
+void Channel::setIndex(int index)
+{
+    _index = index;
+}
+
 void Channel::handleEvent()
 {
    if(_revents & EPOLLIN)
    {
-      _callBack->OnIn(_sockfd);
+      _pCallback->handleRead();
+   }
+   if(_revents & EPOLLOUT)
+   {
+      _pCallback->handleWrite();
    }
 }
 
@@ -37,10 +52,39 @@ void Channel::enableReading()
     update();
 }
 
+void Channel::enableWriting()
+{
+    _events |= EPOLLOUT;
+    update();
+}
+
+void Channel::disableWriting()
+{
+    _events &= ~EPOLLOUT;
+    update();
+}
+
+bool Channel::isWriting()
+{
+    return _events & EPOLLOUT;
+}
+
 void Channel::update()
 {
-    struct epoll_event ev;
-    ev.data.ptr = this;
-    ev.events = _events;
-    epoll_ctl(_epollfd, EPOLL_CTL_ADD, _sockfd, &ev);
+    _pLoop->update(this);
+}
+
+int Channel::getEvents()
+{
+    return _events;
+}
+
+int Channel::getSockfd()
+{
+    return _sockfd;
+}
+
+int Channel::getIndex()
+{
+    return _index;
 }

@@ -1,4 +1,5 @@
 //author voidccc
+
 #include <errno.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -6,26 +7,32 @@
 
 #include "TcpConnection.h"
 #include "Channel.h"
+#include "EventLoop.h"
 #include "Define.h"
+#include "IMuduoUser.h"
 
 #include <string.h> //for bzero
 #include <iostream>
 using namespace std;
 
-TcpConnection::TcpConnection(int epollfd, int sockfd)
-    :_epollfd(epollfd)
-    ,_sockfd(sockfd)
+TcpConnection::TcpConnection(int sockfd, EventLoop* pLoop)
+    :_sockfd(sockfd)
+    ,_pLoop(pLoop)
+    ,_pUser(NULL)
+    ,_inBuf(new string())
+    ,_outBuf(new string())
 {
-    _pChannel = new Channel(_epollfd, _sockfd); // Memory Leak !!!
-    _pChannel->setCallBack(this);
+    _pChannel = new Channel(_pLoop, _sockfd); // Memory Leak !!!
+    _pChannel->setCallback(this);
     _pChannel->enableReading();
 }
 
 TcpConnection::~TcpConnection()
 {}
 
-void TcpConnection::OnIn(int sockfd)
+void TcpConnection::handleRead()
 {
+    int sockfd = _pChannel->getSockfd();
     int readlength;
     char line[MAX_LINE];
     if(sockfd < 0)
@@ -49,7 +56,43 @@ void TcpConnection::OnIn(int sockfd)
     }
     else
     {
-        if(write(sockfd, line, readlength) != readlength)
-            cout << "error: not finished one time" << endl;
+        _inBuf->append(line, readlength);
+        _pUser->onMessage(this, _inBuf);
     }
+}
+
+void TcpConnection::handleWrite()
+{
+    int sockfd = _pChannel->getSockfd();
+    if(_pChannel->isWriting())
+    {
+        int n = ::write(sockfd, _outBuf->c_str(), _outBuf->size());
+        if( n > 0)
+        {
+            cout << "write " << n << " bytes data again" << endl;
+            *_outBuf = _outBuf->substr(n, _outBuf->size());
+            if(_outBuf->empty())
+            {
+                _pChannel->disableWriting();
+            }
+        }
+    }
+}
+
+void TcpConnection::send(const string& message)
+{
+    int n = ::write(_sockfd, message.c_str(), message.size());
+    if( n != static_cast<int>(message.size()))
+        cout << "write error ! " << message.size() - n << "bytes left" << endl;
+}
+
+void TcpConnection::connectEstablished()
+{
+    if(_pUser)
+    _pUser->onConnection(this);
+}
+
+void TcpConnection::setUser(IMuduoUser* user)
+{
+    _pUser = user;
 }

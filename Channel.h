@@ -7,19 +7,27 @@
 class Channel
 {
     public:
-        Channel(int epollfd, int sockfd);
+        Channel(EventLoop* pLoop, int sockfd);
         ~Channel();
-        void setCallBack(IChannelCallBack* callBack);
+        void setCallback(IChannelCallback* pCallback);
         void handleEvent();
         void setRevents(int revent);
+        void setIndex(int index);
         void enableReading();
+        void enableWriting();
+        void disableWriting();
+        bool isWriting();
+        int getEvents();
+        int getSockfd();
+        int getIndex();
     private:
         void update();
-        int _epollfd;
         int _sockfd;
         int _events;
         int _revents;
-        IChannelCallBack* _callBack;
+        int _index;
+        IChannelCallback* _pCallback;
+        EventLoop* _pLoop;
 };
 
 #endif
