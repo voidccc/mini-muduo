@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+#define MESSAGE_LENGTH 8
+
 EchoServer::EchoServer(EventLoop* pLoop)
     :_pLoop(pLoop)
     ,_pServer(pLoop)
@@ -25,8 +27,12 @@ void EchoServer::onConnection(TcpConnection* pCon)
     cout << "onConnection" << endl;
 }
 
-void EchoServer::onMessage(TcpConnection* pCon, const string& data)
+void EchoServer::onMessage(TcpConnection* pCon, string* data)
 {
-    cout << "onmessage" << endl;
-    pCon->send(data);
+    while(data->size() > MESSAGE_LENGTH)
+    {
+        string message = data->substr(0, MESSAGE_LENGTH);
+        *data = data->substr(MESSAGE_LENGTH, data->size()); 
+        pCon->send(message + "\n");
+    }
 }
