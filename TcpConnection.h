@@ -18,12 +18,15 @@ class TcpConnection : public IChannelCallback
         void setUser(IMuduoUser* pUser);
 
         void setCallback(IAcceptorCallback* pCallback);
-        void virtual onIn(int sockfd);
+        void virtual handleRead();
+        void virtual handleWrite();
     private:
         int _sockfd;
         Channel* _pChannel;
         EventLoop* _pLoop;
         IMuduoUser* _pUser;
+        string* _inBuf;
+        string* _outBuf;
 };
 
 #endif

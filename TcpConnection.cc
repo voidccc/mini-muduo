@@ -19,6 +19,8 @@ TcpConnection::TcpConnection(int sockfd, EventLoop* pLoop)
     :_sockfd(sockfd)
     ,_pLoop(pLoop)
     ,_pUser(NULL)
+    ,_inBuf(new string())
+    ,_outBuf(new string())
 {
     _pChannel = new Channel(_pLoop, _sockfd); // Memory Leak !!!
     _pChannel->setCallback(this);
@@ -28,8 +30,9 @@ TcpConnection::TcpConnection(int sockfd, EventLoop* pLoop)
 TcpConnection::~TcpConnection()
 {}
 
-void TcpConnection::onIn(int sockfd)
+void TcpConnection::handleRead()
 {
+    int sockfd = _pChannel->getSockfd();
     int readlength;
     char line[MAX_LINE];
     if(sockfd < 0)
@@ -53,16 +56,48 @@ void TcpConnection::onIn(int sockfd)
     }
     else
     {
-        string buf(line, MAX_LINE);
-        _pUser->onMessage(this, buf);
+        _inBuf->append(line, readlength);
+        _pUser->onMessage(this, _inBuf);
+    }
+}
+
+void TcpConnection::handleWrite()
+{
+    int sockfd = _pChannel->getSockfd();
+    if(_pChannel->isWriting())
+    {
+        int n = ::write(sockfd, _outBuf->c_str(), _outBuf->size());
+        if( n > 0)
+        {
+            cout << "write " << n << " bytes data again" << endl;
+            *_outBuf = _outBuf->substr(n, _outBuf->size());
+            if(_outBuf->empty())
+            {
+                _pChannel->disableWriting();
+            }
+        }
     }
 }
 
 void TcpConnection::send(const string& message)
 {
-    int n = ::write(_sockfd, message.c_str(), message.size());
-    if( n != static_cast<int>(message.size()))
-        cout << "write error ! " << message.size() - n << "bytes left" << endl;
+    int n = 0;
+    if(_outBuf->empty())
+    {
+        n = ::write(_sockfd, message.c_str(), message.size());
+        if(n < 0)
+            cout << "write error" << endl;
+    }
+
+    if( n < static_cast<int>(message.size()))
+    {
+        *_outBuf += message.substr(n, message.size());
+        if(_pChannel->isWriting())
+        {
+            //add EPOLLOUT
+            _pChannel->enableWriting();
+        }
+    }
 }
 
 void TcpConnection::connectEstablished()

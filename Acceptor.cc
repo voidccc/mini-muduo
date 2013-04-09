@@ -53,7 +53,7 @@ int Acceptor::createAndListen()
     return _listenfd;
 }
 
-void Acceptor::onIn(int socket)
+void Acceptor::handleRead()
 {
     int connfd;
     struct sockaddr_in cliaddr;
@@ -75,6 +75,11 @@ void Acceptor::onIn(int socket)
     fcntl(connfd, F_SETFL, O_NONBLOCK); //no-block io
 
     _pCallback->newConnection(connfd);
+}
+
+void Acceptor::handleWrite()
+{
+
 }
 
 void Acceptor::setCallback(IAcceptorCallback* pCallback)
