@@ -4,6 +4,7 @@
 
 #include "Declear.h"
 #include "IChannelCallback.h"
+#include "Buffer.h"
 
 #include <string>
 using namespace std;
@@ -25,8 +26,8 @@ class TcpConnection : public IChannelCallback
         Channel* _pChannel;
         EventLoop* _pLoop;
         IMuduoUser* _pUser;
-        string* _inBuf;
-        string* _outBuf;
+        Buffer _inBuf;
+        Buffer _outBuf;
 };
 
 #endif

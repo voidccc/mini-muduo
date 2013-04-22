@@ -19,8 +19,6 @@ TcpConnection::TcpConnection(int sockfd, EventLoop* pLoop)
     :_sockfd(sockfd)
     ,_pLoop(pLoop)
     ,_pUser(NULL)
-    ,_inBuf(new string())
-    ,_outBuf(new string())
 {
     _pChannel = new Channel(_pLoop, _sockfd); // Memory Leak !!!
     _pChannel->setCallback(this);
@@ -56,8 +54,9 @@ void TcpConnection::handleRead()
     }
     else
     {
-        _inBuf->append(line, readlength);
-        _pUser->onMessage(this, _inBuf);
+        string linestr(line, readlength);
+        _inBuf.append(linestr);
+        _pUser->onMessage(this, &_inBuf);
     }
 }
 
@@ -66,12 +65,12 @@ void TcpConnection::handleWrite()
     int sockfd = _pChannel->getSockfd();
     if(_pChannel->isWriting())
     {
-        int n = ::write(sockfd, _outBuf->c_str(), _outBuf->size());
+        int n = ::write(sockfd, _outBuf.peek(), _outBuf.readableBytes());
         if( n > 0)
         {
             cout << "write " << n << " bytes data again" << endl;
-            *_outBuf = _outBuf->substr(n, _outBuf->size());
-            if(_outBuf->empty())
+            _outBuf.retrieve(n);
+            if(_outBuf.readableBytes() == 0)
             {
                 _pChannel->disableWriting();
             }
@@ -81,9 +80,23 @@ void TcpConnection::handleWrite()
 
 void TcpConnection::send(const string& message)
 {
-    int n = ::write(_sockfd, message.c_str(), message.size());
-    if( n != static_cast<int>(message.size()))
-        cout << "write error ! " << message.size() - n << "bytes left" << endl;
+    int n = 0;
+    if(_outBuf.readableBytes() == 0)
+    {
+        n = ::write(_sockfd, message.c_str(), message.size());
+        if(n < 0)
+            cout << "write error" << endl;
+    }
+
+    if( n < static_cast<int>(message.size()))
+    {
+        _outBuf.append(message.substr(n, message.size()));
+        if(_pChannel->isWriting())
+        {
+            //add EPOLLOUT
+            _pChannel->enableWriting();
+        }
+    }
 }
 
 void TcpConnection::connectEstablished()

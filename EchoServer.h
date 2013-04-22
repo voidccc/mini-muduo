@@ -12,7 +12,8 @@ public:
     ~EchoServer();
     void start();
     void virtual onConnection(TcpConnection* pCon);
-    void virtual onMessage(TcpConnection* pCon, string* data);
+    void virtual onMessage(TcpConnection* pCon, Buffer* pBuf);
+    void virtual onWriteComplate(TcpConnection* pCon);
 private:
     EventLoop* _pLoop;
     TcpServer _pServer;
