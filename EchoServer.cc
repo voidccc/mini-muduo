@@ -27,12 +27,15 @@ void EchoServer::onConnection(TcpConnection* pCon)
     cout << "onConnection" << endl;
 }
 
-void EchoServer::onMessage(TcpConnection* pCon, string* data)
+void EchoServer::onMessage(TcpConnection* pCon, Buffer* pBuf)
 {
-    while(data->size() > MESSAGE_LENGTH)
+    while(pBuf->readableBytes() > MESSAGE_LENGTH)
     {
-        string message = data->substr(0, MESSAGE_LENGTH);
-        *data = data->substr(MESSAGE_LENGTH, data->size()); 
+        string message = pBuf->retrieveAsString(MESSAGE_LENGTH);
         pCon->send(message + "\n");
     }
+}
+void EchoServer::onWriteComplate(TcpConnection* pCon)
+{
+    cout << "onWriteComplate" << endl;
 }
