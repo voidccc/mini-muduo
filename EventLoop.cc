@@ -85,8 +85,10 @@ void EventLoop::handleWrite()
 
 void EventLoop::doPendingFunctors()
 {
+    vector<IRun*> tempRuns;
+    tempRuns.swap(_pendingFunctors);
     vector<IRun*>::iterator it;
-    for(it = _pendingFunctors.begin(); it != _pendingFunctors.end(); ++it)
+    for(it = tempRuns.begin(); it != tempRuns.end(); ++it)
     {
         (*it)->run();
     }
