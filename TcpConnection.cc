@@ -73,7 +73,7 @@ void TcpConnection::handleWrite()
             if(_outBuf.readableBytes() == 0)
             {
                 _pChannel->disableWriting(); //remove EPOLLOUT
-                _pLoop->queueLoop(this); //invoke onWriteComplate
+                _pLoop->queueLoop(this, NULL); //invoke onWriteComplate
             }
         }
     }
@@ -88,7 +88,7 @@ void TcpConnection::send(const string& message)
         if(n < 0)
             cout << "write error" << endl;
         if(n == static_cast<int>(message.size()))
-            _pLoop->queueLoop(this); //invoke onWriteComplate
+            _pLoop->queueLoop(this, NULL); //invoke onWriteComplate
     }
 
     if( n < static_cast<int>(message.size()))
@@ -112,7 +112,7 @@ void TcpConnection::setUser(IMuduoUser* user)
     _pUser = user;
 }
 
-void TcpConnection::run()
+void TcpConnection::run(void* param)
 {
     _pUser->onWriteComplate(this); 
 }
