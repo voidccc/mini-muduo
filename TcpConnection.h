@@ -5,11 +5,13 @@
 #include "Declear.h"
 #include "IChannelCallback.h"
 #include "Buffer.h"
+#include "IRun.h"
 
 #include <string>
 using namespace std;
 
 class TcpConnection : public IChannelCallback
+                      , public IRun
 {
     public:
         TcpConnection(int sockfd, EventLoop* pLoop);
@@ -21,6 +23,7 @@ class TcpConnection : public IChannelCallback
         void setCallback(IAcceptorCallback* pCallback);
         void virtual handleRead();
         void virtual handleWrite();
+        void virtual run();
     private:
         int _sockfd;
         Channel* _pChannel;

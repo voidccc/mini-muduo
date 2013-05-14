@@ -5,8 +5,6 @@
 #include "EventLoop.h"
 #include "Channel.h"
 #include "Epoll.h"
-#include "TimerQueue.h"
-#include "Timestamp.h"
 
 #include <iostream>
 using namespace std;
@@ -14,7 +12,6 @@ using namespace std;
 EventLoop::EventLoop()
     :_quit(false)
     ,_pPoller(new Epoll()) // Memory Leak !!!
-    ,_pTimerQueue(new TimerQueue(this)) // Memory Leak!!!
 {
     _eventfd = createEventfd();
     _wakeupChannel = new Channel(this, _eventfd); // Memory Leak !!!
@@ -47,10 +44,9 @@ void EventLoop::update(Channel* pChannel)
     _pPoller->update(pChannel);
 }
 
-void EventLoop::queueLoop(IRun* pRun, void* param)
+void EventLoop::queueLoop(IRun* pRun)
 {
-    Runner r(pRun, param);
-    _pendingFunctors.push_back(r);
+    _pendingFunctors.push_back(pRun);
     wakeup();
 }
 
@@ -89,30 +85,11 @@ void EventLoop::handleWrite()
 
 void EventLoop::doPendingFunctors()
 {
-    vector<Runner> tempRuns;
+    vector<IRun*> tempRuns;
     tempRuns.swap(_pendingFunctors);
-    vector<Runner>::iterator it;
+    vector<IRun*>::iterator it;
     for(it = tempRuns.begin(); it != tempRuns.end(); ++it)
     {
-        (*it).doRun();
+        (*it)->run();
     }
-}
-int EventLoop::runAt(Timestamp when, IRun* pRun)
-{
-    return _pTimerQueue->addTimer(pRun, when, 0.0);
-}
-
-int EventLoop::runAfter(double delay, IRun* pRun)
-{
-    return _pTimerQueue->addTimer(pRun, Timestamp::nowAfter(delay), 0.0);
-}
-
-int EventLoop::runEvery(double interval, IRun* pRun)
-{
-    return _pTimerQueue->addTimer(pRun, Timestamp::nowAfter(interval), interval);
-}
-
-void EventLoop::cancelTimer(int timerId)
-{
-    _pTimerQueue->cancelTimer(timerId);
 }
