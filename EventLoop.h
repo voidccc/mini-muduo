@@ -12,11 +12,29 @@ using namespace std;
 class EventLoop : public IChannelCallback
 {
     public:
+        class Runner
+        {
+            public:
+               Runner(IRun* r, void* p)
+                   :_pRun(r)
+                   ,_param(p){};
+               void doRun()
+               {
+                   _pRun->run(_param);
+               }
+            private:
+               IRun* _pRun;
+               void* _param;
+        };
         EventLoop();
         ~EventLoop();
         void loop();
         void update(Channel* pChannel);
-        void queueLoop(IRun* pRun);
+        void queueLoop(IRun* pRun, void* param);
+        int runAt(Timestamp when, IRun* pRun);
+        int runAfter(double delay, IRun* pRun);
+        int runEvery(double interval, IRun* pRun);
+        void cancelTimer(int timerfd);
 
         void virtual handleRead();
         void virtual handleWrite();
@@ -28,7 +46,8 @@ class EventLoop : public IChannelCallback
         Epoll* _pPoller;
         int _eventfd;
         Channel* _wakeupChannel;
-        vector<IRun*> _pendingFunctors;
+        vector<Runner> _pendingFunctors;
+        TimerQueue* _pTimerQueue;
 };
 
 #endif

@@ -12,7 +12,7 @@ v0.02
 
 v0.03
 1 Add Channel, Channel is the observer of socket fd.
-2 Add IChannelCallback, move event handler from epoll loop to a callback function in TcpServer
+2 Add IChannelCallback, move event handler from epoll loop to a callback function in TcpServer.
 
 v0.04
 1 Add Acceptor, Acceptor is the observer of listening socket fd.
@@ -27,3 +27,9 @@ v0.06
 
 v0.07
 1 Add input/output buffer.
+
+v0.08
+1 Add input/output buffer.(Buffer and onWriteComplate)
+
+v0.09
+1 Add Timer.

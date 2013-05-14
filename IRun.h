@@ -5,7 +5,7 @@
 class IRun
 {
     public:
-        void virtual run() = 0;
+        void virtual run(void* param) = 0;
 };
 
 #endif

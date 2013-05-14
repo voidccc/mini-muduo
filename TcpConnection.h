@@ -23,7 +23,7 @@ class TcpConnection : public IChannelCallback
         void setCallback(IAcceptorCallback* pCallback);
         void virtual handleRead();
         void virtual handleWrite();
-        void virtual run();
+        void virtual run(void* param);
     private:
         int _sockfd;
         Channel* _pChannel;
