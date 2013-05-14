@@ -36,7 +36,7 @@ void TimerQueue::doAddTimer(void* param)
     bool earliestChanged = insert(pTimer);
     if(earliestChanged)
     {
-        resetTimerfd(_timerfd, pTimer->getStamp()); 
+        resetTimerfd(_timerfd, pTimer->getStamp());
     }
 }
 
@@ -50,16 +50,16 @@ void TimerQueue::doCancelTimer(void* param)
         if(it->second == pTimer)
         {
             _timers.erase(it);
-            break; 
+            break;
         }
-    }   
+    }
 }
 
 ///////////////////////////////////////
 /// Add a timer to the system
 /// @param pRun: callback interface
 /// @param when: time
-/// @param interval: 
+/// @param interval:
 ///     0 = happen only once, no repeat
 ///     n = happen after the first time every n seconds
 /// @return the process unique id of the timer
@@ -84,7 +84,7 @@ void TimerQueue::handleRead()
     vector<Entry>::iterator it;
     for(it = expired.begin(); it != expired.end(); ++it)
     {
-        it->second->run();   
+        it->second->run();
     }
     reset(expired, now);
 }
@@ -98,7 +98,7 @@ int TimerQueue::createTimerfd()
             TFD_NONBLOCK | TFD_CLOEXEC);
     if(timerfd < 0)
     {
-        cout << "failed in timerfd_create" << endl; 
+        cout << "failed in timerfd_create" << endl;
     }
     return timerfd;
 }
@@ -119,7 +119,7 @@ void TimerQueue::readTimerfd(int timerfd, Timestamp now)
     ssize_t n = ::read(timerfd, &howmany, sizeof(howmany));
     if (n != sizeof(howmany))
     {
-        cout << "Timer::readTimerfd() error " << endl;  
+        cout << "Timer::readTimerfd() error " << endl;
     }
 }
 
@@ -128,21 +128,21 @@ void TimerQueue::reset(const vector<Entry>& expired, Timestamp now)
     vector<Entry>::const_iterator it;
     for(it = expired.begin(); it != expired.end(); ++it)
     {
-        if(it->second->isRepeat()) // and it指向的这个
+        if(it->second->isRepeat())
         {
-            it->second->moveToNext(); 
+            it->second->moveToNext();
             insert(it->second);
-        } 
+        }
     }
 
-    Timestamp nextExpire; 
+    Timestamp nextExpire;
     if(!_timers.empty())
     {
-        nextExpire = _timers.begin()->second->getStamp();//why not first ??? 
+        nextExpire = _timers.begin()->second->getStamp();
     }
     if(nextExpire.valid())
     {
-        resetTimerfd(_timerfd, nextExpire); 
+        resetTimerfd(_timerfd, nextExpire);
     }
 }
 
@@ -170,10 +170,10 @@ bool TimerQueue::insert(Timer* pTimer)
         earliestChanged = true;
     }
     pair<TimerList::iterator, bool> result
-       = _timers.insert(Entry(when, pTimer)); 
+       = _timers.insert(Entry(when, pTimer));
     if(!(result.second))
     {
-        cout << "_timers.insert() error " << endl; 
+        cout << "_timers.insert() error " << endl;
     }
 
     return earliestChanged;

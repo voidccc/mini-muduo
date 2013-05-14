@@ -114,5 +114,5 @@ void TcpConnection::setUser(IMuduoUser* user)
 
 void TcpConnection::run(void* param)
 {
-    _pUser->onWriteComplate(this); 
+    _pUser->onWriteComplate(this);
 }

@@ -21,29 +21,29 @@ class TimerQueue : public IChannelCallback
                     :_stamp(stamp)
                     ,_id(stamp)
                     ,_pRun(pRun)
-                    ,_interval(interval) 
+                    ,_interval(interval)
                 {}
                 Timestamp getStamp()
                 {
-                    return _stamp; 
+                    return _stamp;
                 }
                 Timestamp getId()
                 {
-                    return _id; 
+                    return _id;
                 }
                 void run()
                 {
-                    _pRun->run(this); 
+                    _pRun->run(this);
                 }
 
                 bool isRepeat()
                 {
-                    return _interval > 0.0; 
+                    return _interval > 0.0;
                 }
 
                 void moveToNext()
                 {
-                    _stamp = Timestamp::nowAfter(_interval); 
+                    _stamp = Timestamp::nowAfter(_interval);
                 }
             private:
                Timestamp _stamp;
@@ -59,7 +59,7 @@ class TimerQueue : public IChannelCallback
                     :_pQueue(pQueue){};
                 virtual void run(void* param)
                 {
-                    _pQueue->doAddTimer(param); 
+                    _pQueue->doAddTimer(param);
                 };
             private:
                 TimerQueue* _pQueue;
@@ -72,7 +72,7 @@ class TimerQueue : public IChannelCallback
                     :_pQueue(pQueue){};
                 virtual void run(void* param)
                 {
-                    _pQueue->doCancelTimer(param); 
+                    _pQueue->doCancelTimer(param);
                 }
             private:
                 TimerQueue* _pQueue;

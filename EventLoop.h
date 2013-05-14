@@ -20,7 +20,7 @@ class EventLoop : public IChannelCallback
                    ,_param(p){};
                void doRun()
                {
-                   _pRun->run(_param); 
+                   _pRun->run(_param);
                }
             private:
                IRun* _pRun;

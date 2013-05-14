@@ -15,12 +15,12 @@ const char* Buffer::peek()
 
 int Buffer::readableBytes()
 {
-    return static_cast<int>(_buf.size());    
+    return static_cast<int>(_buf.size());
 }
 
 void Buffer::retrieve(int len)
 {
-    _buf = _buf.substr(len, _buf.size());   
+    _buf = _buf.substr(len, _buf.size());
 }
 
 void Buffer::append(const string& data)
