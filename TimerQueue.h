@@ -103,11 +103,11 @@ class TimerQueue : public IChannelCallback
         struct timespec howMuchTimeFromNow(Timestamp when);
 
         int _timerfd;
-        TimerList _timers;
+        TimerList _pTimers;
         EventLoop* _pLoop;
-        Channel* _timerfdChannel;
-        AddTimerWrapper* _addTimerWrapper;
-        CancelTimerWrapper* _cancelTimerWrapper;
+        Channel* _pTimerfdChannel;
+        AddTimerWrapper* _pAddTimerWrapper;
+        CancelTimerWrapper* _pCancelTimerWrapper;
 };
 
 #endif

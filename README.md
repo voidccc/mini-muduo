@@ -33,3 +33,6 @@ v0.08
 
 v0.09
 1 Add Timer.
+
+v0.10
+1 Better naming convention

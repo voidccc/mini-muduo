@@ -79,7 +79,7 @@ int Channel::getEvents()
     return _events;
 }
 
-int Channel::getSockfd()
+int Channel::getfd()
 {
     return _sockfd;
 }

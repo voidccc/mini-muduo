@@ -46,7 +46,7 @@ void Epoll::update(Channel* pChannel)
         struct epoll_event ev;
         ev.data.ptr = pChannel;
         ev.events = pChannel->getEvents();
-        int fd = pChannel->getSockfd();
+        int fd = pChannel->getfd();
         pChannel->setIndex(kAdded);
         ::epoll_ctl(_epollfd, EPOLL_CTL_ADD, fd, &ev);
     }
@@ -55,7 +55,7 @@ void Epoll::update(Channel* pChannel)
         struct epoll_event ev;
         ev.data.ptr = pChannel;
         ev.events = pChannel->getEvents();
-        int fd = pChannel->getSockfd();
+        int fd = pChannel->getfd();
         ::epoll_ctl(_epollfd, EPOLL_CTL_MOD, fd, &ev);
 
     }

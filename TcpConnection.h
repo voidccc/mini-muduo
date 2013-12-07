@@ -26,7 +26,7 @@ class TcpConnection : public IChannelCallback
         void virtual run(void* param);
     private:
         int _sockfd;
-        Channel* _pChannel;
+        Channel* _pSocketChannel;
         EventLoop* _pLoop;
         IMuduoUser* _pUser;
         Buffer _inBuf;

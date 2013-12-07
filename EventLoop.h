@@ -45,7 +45,7 @@ class EventLoop : public IChannelCallback
         bool _quit;
         Epoll* _pPoller;
         int _eventfd;
-        Channel* _wakeupChannel;
+        Channel* _pEventfdChannel;
         vector<Runner> _pendingFunctors;
         TimerQueue* _pTimerQueue;
 };

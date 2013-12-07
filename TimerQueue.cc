@@ -17,12 +17,12 @@
 TimerQueue::TimerQueue(EventLoop *pLoop)
     :_timerfd(createTimerfd())
     ,_pLoop(pLoop)
-    ,_timerfdChannel(new Channel(_pLoop, _timerfd)) // Memory Leak !!!
-    ,_addTimerWrapper(new AddTimerWrapper(this)) // Memory Leak !!!
-    ,_cancelTimerWrapper(new CancelTimerWrapper(this)) // Memory Leak !!!
+    ,_pTimerfdChannel(new Channel(_pLoop, _timerfd)) // Memory Leak !!!
+    ,_pAddTimerWrapper(new AddTimerWrapper(this)) // Memory Leak !!!
+    ,_pCancelTimerWrapper(new CancelTimerWrapper(this)) // Memory Leak !!!
 {
-    _timerfdChannel->setCallback(this);
-    _timerfdChannel->enableReading();
+    _pTimerfdChannel->setCallback(this);
+    _pTimerfdChannel->enableReading();
 }
 
 TimerQueue::~TimerQueue()
@@ -45,11 +45,11 @@ void TimerQueue::doCancelTimer(void* param)
     Timer* pTimer = static_cast<Timer*>(param);
     Entry e(pTimer->getId(), pTimer);
     TimerList::iterator it;
-    for(it = _timers.begin(); it != _timers.end(); ++it)
+    for(it = _pTimers.begin(); it != _pTimers.end(); ++it)
     {
         if(it->second == pTimer)
         {
-            _timers.erase(it);
+            _pTimers.erase(it);
             break;
         }
     }
@@ -66,13 +66,13 @@ void TimerQueue::doCancelTimer(void* param)
 int TimerQueue::addTimer(IRun* pRun, Timestamp when, double interval)
 {
     Timer* pTimer = new Timer(when, pRun, interval); //Memory Leak !!!
-    _pLoop->queueLoop(_addTimerWrapper, pTimer);
+    _pLoop->queueLoop(_pAddTimerWrapper, pTimer);
     return (int)pTimer;
 }
 
 void TimerQueue::cancelTimer(int timerId)
 {
-    _pLoop->queueLoop(_cancelTimerWrapper, (void*)timerId);
+    _pLoop->queueLoop(_pCancelTimerWrapper, (void*)timerId);
 }
 
 void TimerQueue::handleRead()
@@ -107,9 +107,9 @@ std::vector<TimerQueue::Entry> TimerQueue::getExpired(Timestamp now)
 {
     std::vector<Entry> expired;
     Entry sentry(now, reinterpret_cast<Timer*>(UINTPTR_MAX));
-    TimerList::iterator end = _timers.lower_bound(sentry);
-    copy(_timers.begin(), end, back_inserter(expired));
-    _timers.erase(_timers.begin(), end);
+    TimerList::iterator end = _pTimers.lower_bound(sentry);
+    copy(_pTimers.begin(), end, back_inserter(expired));
+    _pTimers.erase(_pTimers.begin(), end);
     return expired;
 }
 
@@ -136,9 +136,9 @@ void TimerQueue::reset(const vector<Entry>& expired, Timestamp now)
     }
 
     Timestamp nextExpire;
-    if(!_timers.empty())
+    if(!_pTimers.empty())
     {
-        nextExpire = _timers.begin()->second->getStamp();
+        nextExpire = _pTimers.begin()->second->getStamp();
     }
     if(nextExpire.valid())
     {
@@ -164,16 +164,16 @@ bool TimerQueue::insert(Timer* pTimer)
 {
     bool earliestChanged = false;
     Timestamp when = pTimer->getStamp();
-    TimerList::iterator it = _timers.begin();
-    if(it == _timers.end() || when < it->first)
+    TimerList::iterator it = _pTimers.begin();
+    if(it == _pTimers.end() || when < it->first)
     {
         earliestChanged = true;
     }
     pair<TimerList::iterator, bool> result
-       = _timers.insert(Entry(when, pTimer));
+       = _pTimers.insert(Entry(when, pTimer));
     if(!(result.second))
     {
-        cout << "_timers.insert() error " << endl;
+        cout << "_pTimers.insert() error " << endl;
     }
 
     return earliestChanged;

@@ -19,7 +19,7 @@ class Acceptor : public IChannelCallback
     private:
         int createAndListen();
         int _listenfd;
-        Channel* _pAcceptChannel;
+        Channel* _pSocketAChannel;
         IAcceptorCallback* _pCallback;
         EventLoop* _pLoop;
 };

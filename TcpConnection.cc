@@ -20,9 +20,9 @@ TcpConnection::TcpConnection(int sockfd, EventLoop* pLoop)
     ,_pLoop(pLoop)
     ,_pUser(NULL)
 {
-    _pChannel = new Channel(_pLoop, _sockfd); // Memory Leak !!!
-    _pChannel->setCallback(this);
-    _pChannel->enableReading();
+    _pSocketChannel = new Channel(_pLoop, _sockfd); // Memory Leak !!!
+    _pSocketChannel->setCallback(this);
+    _pSocketChannel->enableReading();
 }
 
 TcpConnection::~TcpConnection()
@@ -30,7 +30,7 @@ TcpConnection::~TcpConnection()
 
 void TcpConnection::handleRead()
 {
-    int sockfd = _pChannel->getSockfd();
+    int sockfd = _pSocketChannel->getfd();
     int readlength;
     char line[MAX_LINE];
     if(sockfd < 0)
@@ -62,8 +62,8 @@ void TcpConnection::handleRead()
 
 void TcpConnection::handleWrite()
 {
-    int sockfd = _pChannel->getSockfd();
-    if(_pChannel->isWriting())
+    int sockfd = _pSocketChannel->getfd();
+    if(_pSocketChannel->isWriting())
     {
         int n = ::write(sockfd, _outBuf.peek(), _outBuf.readableBytes());
         if( n > 0)
@@ -72,7 +72,7 @@ void TcpConnection::handleWrite()
             _outBuf.retrieve(n);
             if(_outBuf.readableBytes() == 0)
             {
-                _pChannel->disableWriting(); //remove EPOLLOUT
+                _pSocketChannel->disableWriting(); //remove EPOLLOUT
                 _pLoop->queueLoop(this, NULL); //invoke onWriteComplate
             }
         }
@@ -94,9 +94,9 @@ void TcpConnection::send(const string& message)
     if( n < static_cast<int>(message.size()))
     {
         _outBuf.append(message.substr(n, message.size()));
-        if(_pChannel->isWriting())
+        if(_pSocketChannel->isWriting())
         {
-            _pChannel->enableWriting(); //add EPOLLOUT
+            _pSocketChannel->enableWriting(); //add EPOLLOUT
         }
     }
 }
