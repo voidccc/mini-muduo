@@ -82,10 +82,10 @@ class TimerQueue : public IChannelCallback
         ~TimerQueue();
         void doAddTimer(void* param);
         void doCancelTimer(void* param);
-        int addTimer(IRun* pRun,
+        long addTimer(IRun* pRun,
                 Timestamp when,
                 double interval);
-        void cancelTimer(int timerId);
+        void cancelTimer(long timerId);
 
         virtual void handleRead();
         virtual void handleWrite();

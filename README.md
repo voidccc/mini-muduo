@@ -36,3 +36,7 @@ v0.09
 
 v0.10
 1 Better naming convention
+
+v0.11
+1 remove muti-thread specific code
+2 32-bit/64-bit support

@@ -63,14 +63,14 @@ void TimerQueue::doCancelTimer(void* param)
 ///     0 = happen only once, no repeat
 ///     n = happen after the first time every n seconds
 /// @return the process unique id of the timer
-int TimerQueue::addTimer(IRun* pRun, Timestamp when, double interval)
+long TimerQueue::addTimer(IRun* pRun, Timestamp when, double interval)
 {
     Timer* pTimer = new Timer(when, pRun, interval); //Memory Leak !!!
     _pLoop->queueLoop(_pAddTimerWrapper, pTimer);
-    return (int)pTimer;
+    return (long)pTimer;
 }
 
-void TimerQueue::cancelTimer(int timerId)
+void TimerQueue::cancelTimer(long timerId)
 {
     _pLoop->queueLoop(_pCancelTimerWrapper, (void*)timerId);
 }
