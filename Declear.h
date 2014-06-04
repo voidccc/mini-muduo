@@ -15,4 +15,7 @@ class TimerQueue;
 class Timestamp;
 class IRun;
 
+class Thread;
+class ThreadPool;
+
 #endif

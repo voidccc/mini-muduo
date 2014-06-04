@@ -40,3 +40,6 @@ v0.10
 v0.11
 1 remove muti-thread specific code
 2 32-bit/64-bit support
+
+v0.12
+1 Foundations of multi-thread

@@ -4,7 +4,7 @@
 # ######################################
 # #目标（可执行文档）名称，库（譬如stdcx,iostr,mysql等），头文件路径
 DESTINATION := mini-muduo
-LIBS :=
+LIBS := pthread
 INCLUDES := .
 
 
