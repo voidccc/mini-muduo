@@ -7,12 +7,14 @@
 #include <sstream>
 using namespace std;
 
-ThreadPool::ThreadPool(int size)
-    :_size(size)
+ThreadPool::ThreadPool() { }
+
+void ThreadPool::start(int numThreads)
 {
-    for(int i = 0 ; i < size; i++)
+    _threads.reserve(numThreads);
+    for(int i = 0 ; i < numThreads; i++)
     {
-        Thread* p = new Thread();
+        Thread* p = new Thread(this);
         _threads.push_back(p);
         p->start();
     }
@@ -20,11 +22,20 @@ ThreadPool::ThreadPool(int size)
 
 void ThreadPool::addTask(IRun* ptask)
 {
-    Thread* pthread = getRandomThread();
-    pthread->addTask(ptask);
+    _tasks.put(ptask);
 }
 
-Thread* ThreadPool::getRandomThread()
+//virtual for Thread
+void ThreadPool::run(void* param)
 {
-    return _threads[_index++ % _size];
+    runInThread();
+}
+
+void ThreadPool::runInThread()
+{
+    while(true)
+    {
+        IRun* task = (IRun*)_tasks.take();
+        task->run(NULL);
+    }
 }

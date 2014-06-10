@@ -11,29 +11,19 @@ void* globalRun(void* arg)
     return 0;
 }
 
-Thread::Thread()
-{
-    
-}
-
-void Thread::run()
-{
-    while(true)
-    {
-        IRun* task = (IRun*)_tasks.take();
-        task->run(NULL);
-    } 
-}
-
-void Thread::addTask(IRun* ptask)
-{
-    _tasks.put(ptask);
-}
+Thread::Thread(IRun* pRun)
+    :_run(pRun)
+{ }
 
 void Thread::start()
 {
     pthread_t t;
     ::pthread_create(&t, NULL, globalRun, this);
+}
+
+void Thread::run()
+{
+    _run->run(NULL);
 }
 
 pid_t Thread::gettid()

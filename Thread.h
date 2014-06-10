@@ -10,13 +10,12 @@
 class Thread
 {
     public:
-        Thread();
+        Thread(IRun* pRun);
         void start();
-        void addTask(IRun* ptask);
         void run();
         pid_t gettid();
     private:
-        BlockingQueue<IRun*> _tasks;
+        IRun* _run;
 };
 
 #endif
