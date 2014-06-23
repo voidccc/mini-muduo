@@ -13,8 +13,10 @@ class IMuduoUser;
 class Buffer;
 class TimerQueue;
 class Timestamp;
-class IRun;
-
+class IRun0;
+class IRun2;
+class Timer;
+class Task;
 class Thread;
 class ThreadPool;
 

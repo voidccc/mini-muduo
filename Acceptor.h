@@ -14,8 +14,8 @@ class Acceptor : public IChannelCallback
 
         void start();
         void setCallback(IAcceptorCallback* pCallback);
-        void virtual handleRead();
-        void virtual handleWrite();
+        virtual void handleRead();
+        virtual void handleWrite();
     private:
         int createAndListen();
         int _listenfd;

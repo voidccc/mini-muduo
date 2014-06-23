@@ -1,11 +1,7 @@
 //author voidccc
 
-#include <pthread.h>
 #include "ThreadPool.h"
 #include "Thread.h"
-#include <iostream>
-#include <sstream>
-using namespace std;
 
 ThreadPool::ThreadPool() { }
 
@@ -14,19 +10,21 @@ void ThreadPool::start(int numThreads)
     _threads.reserve(numThreads);
     for(int i = 0 ; i < numThreads; i++)
     {
-        Thread* p = new Thread(this);
+        Task task(this);
+        Thread* p = new Thread(task);
         _threads.push_back(p);
         p->start();
     }
 }
 
-void ThreadPool::addTask(IRun* ptask)
+//virtual for Thread
+void ThreadPool::addTask(Task& task)
 {
-    _tasks.put(ptask);
+    _tasks.put(task);
 }
 
-//virtual for Thread
-void ThreadPool::run(void* param)
+//virtual for Thread class
+void ThreadPool::run0()
 {
     runInThread();
 }
@@ -35,7 +33,6 @@ void ThreadPool::runInThread()
 {
     while(true)
     {
-        IRun* task = (IRun*)_tasks.take();
-        task->run(NULL);
+        _tasks.take().doTask();
     }
 }

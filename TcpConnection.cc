@@ -10,6 +10,7 @@
 #include "EventLoop.h"
 #include "Define.h"
 #include "IMuduoUser.h"
+#include "Task.h"
 
 #include <string.h> //for bzero
 #include <iostream>
@@ -73,13 +74,27 @@ void TcpConnection::handleWrite()
             if(_outBuf.readableBytes() == 0)
             {
                 _pSocketChannel->disableWriting(); //remove EPOLLOUT
-                _pLoop->queueLoop(this, NULL); //invoke onWriteComplate
+                Task task(this);
+                _pLoop->queueLoop(task); //invoke onWriteComplate
             }
         }
     }
 }
 
 void TcpConnection::send(const string& message)
+{
+    if(_pLoop->isInLoopThread())
+    {
+        sendInLoop(message);
+    }
+    else
+    {
+        Task task(this, message, this);
+        _pLoop->runInLoop(task);
+    }
+}
+
+void TcpConnection::sendInLoop(const string& message)
 {
     int n = 0;
     if(_outBuf.readableBytes() == 0)
@@ -88,13 +103,16 @@ void TcpConnection::send(const string& message)
         if(n < 0)
             cout << "write error" << endl;
         if(n == static_cast<int>(message.size()))
-            _pLoop->queueLoop(this, NULL); //invoke onWriteComplate
+        {
+            Task task(this);
+            _pLoop->queueLoop(task); //invoke onWriteComplate
+        }
     }
 
     if( n < static_cast<int>(message.size()))
     {
         _outBuf.append(message.substr(n, message.size()));
-        if(_pSocketChannel->isWriting())
+        if(!_pSocketChannel->isWriting())
         {
             _pSocketChannel->enableWriting(); //add EPOLLOUT
         }
@@ -104,7 +122,7 @@ void TcpConnection::send(const string& message)
 void TcpConnection::connectEstablished()
 {
     if(_pUser)
-    _pUser->onConnection(this);
+        _pUser->onConnection(this);
 }
 
 void TcpConnection::setUser(IMuduoUser* user)
@@ -112,7 +130,12 @@ void TcpConnection::setUser(IMuduoUser* user)
     _pUser = user;
 }
 
-void TcpConnection::run(void* param)
+void TcpConnection::run0()
 {
     _pUser->onWriteComplate(this);
+}
+
+void TcpConnection::run2(const string& message, void* param)
+{
+    sendInLoop(message);
 }

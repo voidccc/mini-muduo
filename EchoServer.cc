@@ -3,6 +3,8 @@
 #include "EchoServer.h"
 #include "TcpConnection.h"
 #include "EventLoop.h"
+#include "CurrentThread.h"
+#include "Task.h"
 
 #include <iostream>
 
@@ -23,6 +25,7 @@ EchoServer::~EchoServer()
 void EchoServer::start()
 {
     _pServer.start();
+    _threadpool.start(3);
 }
 
 void EchoServer::onConnection(TcpConnection* pCon)
@@ -35,21 +38,26 @@ void EchoServer::onMessage(TcpConnection* pCon, Buffer* pBuf)
     while(pBuf->readableBytes() > MESSAGE_LENGTH)
     {
         string message = pBuf->retrieveAsString(MESSAGE_LENGTH);
-        pCon->send(message + "\n");
+        Task task(this, message, pCon);
+        _threadpool.addTask(task);
     }
-    _timer = _pLoop->runEvery(0.5, this);
 }
+
 void EchoServer::onWriteComplate(TcpConnection* pCon)
 {
     cout << "onWriteComplate" << endl;
 }
 
-void EchoServer::run(void* param)
+//run in different therad
+void EchoServer::run2(const string& str, void* tcp)
 {
-    cout << _index << endl;
-    if(_index++ == 3)
-    {
-        _pLoop->cancelTimer(_timer);
-        _index = 0;
-    }
+    //IO blocking task or CPU busy task
+    cout << "fib(30) = " << fib(30) << " tid = " << CurrentThread::tid() << endl;
+    ((TcpConnection*)tcp)->send(str + "\n");
+}
+
+//fib is short for Fibonacci, fib is a CPU busy method
+int EchoServer::fib(int n)
+{
+    return (n == 1 || n == 2) ? 1 : (fib(n-1) + fib(n-2));
 }

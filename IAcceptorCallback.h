@@ -5,7 +5,7 @@
 class IAcceptorCallback
 {
     public:
-        void virtual newConnection(int sockfd) = 0;
+        virtual void newConnection(int sockfd) = 0;
 };
 
 #endif

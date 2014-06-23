@@ -12,80 +12,20 @@
 using namespace std;
 
 class TimerQueue : public IChannelCallback
+                 , public IRun2
 {
     public:
-        class Timer
-        {
-            public:
-                Timer(Timestamp stamp, IRun* pRun, double interval)
-                    :_stamp(stamp)
-                    ,_id(stamp)
-                    ,_pRun(pRun)
-                    ,_interval(interval)
-                {}
-                Timestamp getStamp()
-                {
-                    return _stamp;
-                }
-                Timestamp getId()
-                {
-                    return _id;
-                }
-                void run()
-                {
-                    _pRun->run(this);
-                }
-
-                bool isRepeat()
-                {
-                    return _interval > 0.0;
-                }
-
-                void moveToNext()
-                {
-                    _stamp = Timestamp::nowAfter(_interval);
-                }
-            private:
-               Timestamp _stamp;
-               Timestamp _id;
-               IRun* _pRun;
-               double _interval;//seconds
-        };
-
-        class AddTimerWrapper : public IRun
-        {
-            public:
-                AddTimerWrapper(TimerQueue* pQueue)
-                    :_pQueue(pQueue){};
-                virtual void run(void* param)
-                {
-                    _pQueue->doAddTimer(param);
-                };
-            private:
-                TimerQueue* _pQueue;
-        };
-
-        class CancelTimerWrapper : public IRun
-        {
-            public:
-                CancelTimerWrapper(TimerQueue* pQueue)
-                    :_pQueue(pQueue){};
-                virtual void run(void* param)
-                {
-                    _pQueue->doCancelTimer(param);
-                }
-            private:
-                TimerQueue* _pQueue;
-        };
 
         TimerQueue(EventLoop* pLoop);
         ~TimerQueue();
-        void doAddTimer(void* param);
-        void doCancelTimer(void* param);
-        long addTimer(IRun* pRun,
+        void doAddTimer(Timer* timer);
+        void doCancelTimer(Timer* timer);
+        long addTimer(IRun0* pRun,
                 Timestamp when,
                 double interval);
         void cancelTimer(long timerId);
+
+        virtual void run2(const string& str, void* timer);
 
         virtual void handleRead();
         virtual void handleWrite();
@@ -106,8 +46,6 @@ class TimerQueue : public IChannelCallback
         TimerList _pTimers;
         EventLoop* _pLoop;
         Channel* _pTimerfdChannel;
-        AddTimerWrapper* _pAddTimerWrapper;
-        CancelTimerWrapper* _pCancelTimerWrapper;
 };
 
 #endif

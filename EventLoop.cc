@@ -7,6 +7,8 @@
 #include "Epoll.h"
 #include "TimerQueue.h"
 #include "Timestamp.h"
+#include "Task.h"
+#include "CurrentThread.h"
 
 #include <iostream>
 using namespace std;
@@ -14,6 +16,7 @@ using namespace std;
 EventLoop::EventLoop()
     :_quit(false)
     ,_pPoller(new Epoll()) // Memory Leak !!!
+    ,_threadId(CurrentThread::tid())
     ,_pTimerQueue(new TimerQueue(this)) // Memory Leak!!!
 {
     _eventfd = createEventfd();
@@ -47,11 +50,22 @@ void EventLoop::update(Channel* pChannel)
     _pPoller->update(pChannel);
 }
 
-void EventLoop::queueLoop(IRun* pRun, void* param)
+void EventLoop::queueLoop(Task& task)
 {
-    Runner r(pRun, param);
-    _pendingFunctors.push_back(r);
-    //wakeup();
+    _pendingFunctors.push_back(task);
+    wakeup();
+}
+
+void EventLoop::runInLoop(Task& task)
+{
+    if(isInLoopThread())
+    {
+        task.doTask();
+    }
+    else
+    {
+        queueLoop(task);
+    }
 }
 
 void EventLoop::wakeup()
@@ -89,25 +103,25 @@ void EventLoop::handleWrite()
 
 void EventLoop::doPendingFunctors()
 {
-    vector<Runner> tempRuns;
+    vector<Task> tempRuns;
     tempRuns.swap(_pendingFunctors);
-    vector<Runner>::iterator it;
+    vector<Task>::iterator it;
     for(it = tempRuns.begin(); it != tempRuns.end(); ++it)
     {
-        (*it).doRun();
+        it->doTask();
     }
 }
-int EventLoop::runAt(Timestamp when, IRun* pRun)
+int EventLoop::runAt(Timestamp when, IRun0* pRun)
 {
     return _pTimerQueue->addTimer(pRun, when, 0.0);
 }
 
-int EventLoop::runAfter(double delay, IRun* pRun)
+int EventLoop::runAfter(double delay, IRun0* pRun)
 {
     return _pTimerQueue->addTimer(pRun, Timestamp::nowAfter(delay), 0.0);
 }
 
-int EventLoop::runEvery(double interval, IRun* pRun)
+int EventLoop::runEvery(double interval, IRun0* pRun)
 {
     return _pTimerQueue->addTimer(pRun, Timestamp::nowAfter(interval), interval);
 }
@@ -115,4 +129,9 @@ int EventLoop::runEvery(double interval, IRun* pRun)
 void EventLoop::cancelTimer(int timerId)
 {
     _pTimerQueue->cancelTimer(timerId);
+}
+
+bool EventLoop::isInLoopThread()
+{
+    return _threadId == CurrentThread::tid();
 }

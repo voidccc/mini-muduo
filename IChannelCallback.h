@@ -5,8 +5,8 @@
 class IChannelCallback
 {
     public:
-        void virtual handleRead() = 0;
-        void virtual handleWrite() = 0;
+        virtual void handleRead() = 0;
+        virtual void handleWrite() = 0;
 };
 
 #endif

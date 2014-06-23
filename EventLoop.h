@@ -4,7 +4,7 @@
 
 #include "Declear.h"
 #include "IChannelCallback.h"
-#include "IRun.h"
+#include "Task.h"
 
 #include <vector>
 using namespace std;
@@ -12,32 +12,20 @@ using namespace std;
 class EventLoop : public IChannelCallback
 {
     public:
-        class Runner
-        {
-            public:
-               Runner(IRun* r, void* p)
-                   :_pRun(r)
-                   ,_param(p){};
-               void doRun()
-               {
-                   _pRun->run(_param);
-               }
-            private:
-               IRun* _pRun;
-               void* _param;
-        };
         EventLoop();
         ~EventLoop();
         void loop();
         void update(Channel* pChannel);
-        void queueLoop(IRun* pRun, void* param);
-        int runAt(Timestamp when, IRun* pRun);
-        int runAfter(double delay, IRun* pRun);
-        int runEvery(double interval, IRun* pRun);
+        void queueLoop(Task& task);
+        void runInLoop(Task& task);
+        int runAt(Timestamp when, IRun0* pRun);
+        int runAfter(double delay, IRun0* pRun);
+        int runEvery(double interval, IRun0* pRun);
         void cancelTimer(int timerfd);
+        bool isInLoopThread();
 
-        void virtual handleRead();
-        void virtual handleWrite();
+        virtual void handleRead();
+        virtual void handleWrite();
     private:
         void wakeup();
         int createEventfd();
@@ -45,8 +33,9 @@ class EventLoop : public IChannelCallback
         bool _quit;
         Epoll* _pPoller;
         int _eventfd;
+        const pid_t _threadId;
         Channel* _pEventfdChannel;
-        vector<Runner> _pendingFunctors;
+        vector<Task> _pendingFunctors;
         TimerQueue* _pTimerQueue;
 };
 
