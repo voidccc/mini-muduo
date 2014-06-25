@@ -52,8 +52,15 @@ void EventLoop::update(Channel* pChannel)
 
 void EventLoop::queueLoop(Task& task)
 {
-    _pendingFunctors.push_back(task);
-    wakeup();
+    {
+        MutexLockGuard guard(_mutex);
+        _pendingFunctors.push_back(task);
+    }
+
+    if(!isInLoopThread())
+    {
+        wakeup();
+    }
 }
 
 void EventLoop::runInLoop(Task& task)
@@ -104,7 +111,10 @@ void EventLoop::handleWrite()
 void EventLoop::doPendingFunctors()
 {
     vector<Task> tempRuns;
-    tempRuns.swap(_pendingFunctors);
+    {
+        MutexLockGuard guard(_mutex);
+        tempRuns.swap(_pendingFunctors);
+    }
     vector<Task>::iterator it;
     for(it = tempRuns.begin(); it != tempRuns.end(); ++it)
     {

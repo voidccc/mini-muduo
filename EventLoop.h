@@ -5,6 +5,7 @@
 #include "Declear.h"
 #include "IChannelCallback.h"
 #include "Task.h"
+#include "Mutex.h"
 
 #include <vector>
 using namespace std;
@@ -35,6 +36,7 @@ class EventLoop : public IChannelCallback
         int _eventfd;
         const pid_t _threadId;
         Channel* _pEventfdChannel;
+        MutexLock _mutex;
         vector<Task> _pendingFunctors;
         TimerQueue* _pTimerQueue;
 };
