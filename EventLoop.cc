@@ -15,6 +15,7 @@ using namespace std;
 
 EventLoop::EventLoop()
     :_quit(false)
+    ,_callingPendingFunctors(false)
     ,_pPoller(new Epoll()) // Memory Leak !!!
     ,_threadId(CurrentThread::tid())
     ,_pTimerQueue(new TimerQueue(this)) // Memory Leak!!!
@@ -50,14 +51,14 @@ void EventLoop::update(Channel* pChannel)
     _pPoller->update(pChannel);
 }
 
-void EventLoop::queueLoop(Task& task)
+void EventLoop::queueInLoop(Task& task)
 {
     {
         MutexLockGuard guard(_mutex);
         _pendingFunctors.push_back(task);
     }
 
-    if(!isInLoopThread())
+    if(!isInLoopThread() || _callingPendingFunctors)
     {
         wakeup();
     }
@@ -71,7 +72,7 @@ void EventLoop::runInLoop(Task& task)
     }
     else
     {
-        queueLoop(task);
+        queueInLoop(task);
     }
 }
 
@@ -111,6 +112,7 @@ void EventLoop::handleWrite()
 void EventLoop::doPendingFunctors()
 {
     vector<Task> tempRuns;
+    _callingPendingFunctors = true;
     {
         MutexLockGuard guard(_mutex);
         tempRuns.swap(_pendingFunctors);
@@ -120,6 +122,7 @@ void EventLoop::doPendingFunctors()
     {
         it->doTask();
     }
+    _callingPendingFunctors = false;
 }
 int EventLoop::runAt(Timestamp when, IRun0* pRun)
 {

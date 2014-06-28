@@ -17,7 +17,7 @@ class EventLoop : public IChannelCallback
         ~EventLoop();
         void loop();
         void update(Channel* pChannel);
-        void queueLoop(Task& task);
+        void queueInLoop(Task& task);
         void runInLoop(Task& task);
         int runAt(Timestamp when, IRun0* pRun);
         int runAfter(double delay, IRun0* pRun);
@@ -32,6 +32,7 @@ class EventLoop : public IChannelCallback
         int createEventfd();
         void doPendingFunctors();
         bool _quit;
+        bool _callingPendingFunctors;
         Epoll* _pPoller;
         int _eventfd;
         const pid_t _threadId;

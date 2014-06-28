@@ -75,7 +75,7 @@ void TcpConnection::handleWrite()
             {
                 _pSocketChannel->disableWriting(); //remove EPOLLOUT
                 Task task(this);
-                _pLoop->queueLoop(task); //invoke onWriteComplate
+                _pLoop->queueInLoop(task); //invoke onWriteComplate
             }
         }
     }
@@ -105,7 +105,7 @@ void TcpConnection::sendInLoop(const string& message)
         if(n == static_cast<int>(message.size()))
         {
             Task task(this);
-            _pLoop->queueLoop(task); //invoke onWriteComplate
+            _pLoop->queueInLoop(task); //invoke onWriteComplate
         }
     }
 

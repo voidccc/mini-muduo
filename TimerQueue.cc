@@ -82,7 +82,7 @@ long TimerQueue::addTimer(IRun0* pRun, Timestamp when, double interval)
     Timer* pAddTimer = new Timer(when, pRun, interval); //Memory Leak !!!
     string str("addTimer");
     Task task(this, str, pAddTimer);
-    _pLoop->queueLoop(task);
+    _pLoop->queueInLoop(task);
     return (long)(pAddTimer);
 }
 
@@ -91,7 +91,7 @@ void TimerQueue::cancelTimer(long timerId)
     Timer* pCancel = (Timer*)(timerId);
     string str("canceltimer");
     Task task(this, str, pCancel);
-    _pLoop->queueLoop(task);
+    _pLoop->queueInLoop(task);
 }
 
 void TimerQueue::handleRead()
